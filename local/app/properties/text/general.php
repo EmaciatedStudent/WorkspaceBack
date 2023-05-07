@@ -3,7 +3,7 @@
 class UserTextEditor
 {
     // инициализация пользовательского свойства для главного модуля
-    function GetUserTypeDescription(): array
+    static function GetUserTypeDescription(): array
     {
         return [
             'USER_TYPE_ID' => 'text',

@@ -52,7 +52,7 @@ try {
     }
     $arReturn = $class::$function($arParams);
 
-    if (empty($arReturn['status']) or empty($arReturn['code'])) {
+    if (empty($arReturn['status'])) {
         throw new Exception('Метод не смог вернуть ответ');
     }
 
