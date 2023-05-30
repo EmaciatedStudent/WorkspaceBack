@@ -13,10 +13,12 @@ CModule::IncludeModule('highloadblock');
 
 try {
     Loader::registerAutoLoadClasses(null, [
+        'Legacy\Config' => '/local/app/classes/config.php',
         'Legacy\Helper' => '/local/app/classes/helper/general.php',
 
         'Legacy\Api\Auth' => '/local/app/classes/auth/api.php',
-
+        'Legacy\Api\User' => '/local/app/classes/user/api.php',
+        'Legacy\Api\Room' => '/local/app/classes/room/api.php',
     ]);
 } catch (LoaderException $e) {
     // класс не найден :(

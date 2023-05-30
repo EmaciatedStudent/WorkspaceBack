@@ -10,9 +10,5 @@ class Config
     public const SiteDomen = 'http://legacyback.devaid.ru';
 
     // константы связанные с IBlock`ами
-
-    //Блок с необходимой наполняемостью страниц
-
-    //Блок контента
-
+    public const Rooms = 2;
 }
