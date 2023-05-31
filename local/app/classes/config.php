@@ -10,5 +10,6 @@ class Config
     public const SiteDomen = 'http://legacyback.devaid.ru';
 
     // константы связанные с IBlock`ами
+    public const Groups = 18;
     public const Rooms = 2;
 }
