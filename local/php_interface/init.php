@@ -19,6 +19,10 @@ try {
         'Legacy\Api\Auth' => '/local/app/classes/auth/api.php',
         'Legacy\Api\User' => '/local/app/classes/user/api.php',
         'Legacy\Api\Room' => '/local/app/classes/room/api.php',
+        'Legacy\Api\Company' => '/local/app/classes/company/api.php',
+        'Legacy\Api\Deal' => '/local/app/classes/deal/api.php',
+        'Legacy\Api\Booking' => '/local/app/classes/booking/api.php',
+        'Legacy\Api\CRM' => '/local/app/classes/CRM/api.php',
     ]);
 } catch (LoaderException $e) {
     // класс не найден :(

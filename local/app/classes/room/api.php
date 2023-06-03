@@ -1,7 +1,7 @@
 <?php
 
 namespace Legacy\Api;
-//use Legacy\Config;
+use Legacy\Config;
 use Legacy\Helper;
 use Bitrix\Main\UserTable;
 

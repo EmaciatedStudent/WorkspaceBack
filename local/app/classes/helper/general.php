@@ -35,18 +35,21 @@ class Helper
     }
 
 
-    public static function GetResponseAjax($code, $data)
-    {
-        if ($code) {
-            $code = 200;
-        } else {
-            $code = 422;
+    public static function CurlCRM($method, $arData=array()){
+        $queryUrl = "https://legacy.bitrix24.ru/rest/16/4dnhn1xtr5kp6hup/".$method;
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $queryUrl,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_POST => 1,
+            CURLOPT_HEADER => 0,
+            CURLOPT_RETURNTRANSFER => 1,
+        ));
+        if(!empty($arData)){
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($arData));
         }
-
-        $arData = $data;
-        $arData["code"] = $code;
-        $arData["status"] = $data['message'];
-
-        return $arData;
+        $result = curl_exec($curl);
+        curl_close($curl);
+        return json_decode($result,true);
     }
 }

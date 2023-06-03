@@ -3,6 +3,7 @@
 namespace Legacy\Api;
 use Legacy\Helper;
 use Bitrix\Main\UserTable;
+use Legacy\Api\CRM;
 
 class Auth {
 
@@ -17,6 +18,28 @@ class Auth {
         $email = $arRequest['email'];
         $group = explode(',', $arRequest['group']);
 
+        $deal_id = $arRequest['dealid'];
+        $dealInfo = CRM::GetDealInfo($deal_id);
+        $companyInfo = CRM::GetCompanyInfo($deal_id);
+        $productsInfo = CRM::GetProductsInfo($deal_id);
+
+        $arCompanyFields = Array(
+            'name' => $companyInfo['TITLE'],
+            'address' => $companyInfo['ADDRESS'],
+            'phone' => $companyInfo['PHONE'],
+            'email' => $companyInfo['EMAIL'],
+            'id_crm' => $companyInfo['ID']
+        );
+        $company_id = Company::AddCompany($arCompanyFields);
+
+        $arDealFields = Array(
+            'name' => $dealInfo['TITLE'],
+            'hours_count' => $productsInfo[1]["QUANTITY"],
+            'company' => $company_id,
+            'id_crm' => $deal_id,
+        );
+        $deal = Deal::AddDeal($arDealFields);
+
         $arFields = Array(
             "LOGIN" => $login,
             "NAME" => $name,
@@ -24,9 +47,9 @@ class Auth {
             "PASSWORD" => $password,
             "CONFIRM_PASSWORD" => $confirm_password,
             "EMAIL" => $email,
-            "GROUP_ID" => $group
+            "GROUP_ID" => $group,
+            "WORK_COMPANY" => $company_id,
         );
-
 
         if ($USER->Add($arFields)) {
             $arAuthResult = $USER->Login($login, $password);
