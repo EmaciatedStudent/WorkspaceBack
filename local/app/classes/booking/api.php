@@ -45,16 +45,10 @@ class Booking {
         return Helper::GetResponseApi(200, ['time_intervals' => $arResult]);
     }
 
-    public static function GetBookingByPeriod($arRequest) {
-        $roomID = $arRequest['room_id'];
-        $date_start = self::formatDate($arRequest['date_start']);
-        $date_end = self::formatDate($arRequest['date_end']);
-
+    public static function GetBookingInfo($bookingID) {
         $arFilter = Array('IBLOCK_ID'=> \Legacy\Config::Booking,
             'ACTIVE' => 'Y',
-            'PROPERTY_ROOM' => $roomID,
-            '>=PROPERTY_DATE' => $date_start,
-            '<=PROPERTY_DATE' => $date_end
+            'ID' => $bookingID
         );
 
         $arSelect = [
@@ -64,7 +58,8 @@ class Booking {
             'PROPERTY_ROOM',
             'PROPERTY_DATE',
             'PROPERTY_TIME_START',
-            'PROPERTY_TIME_END'
+            'PROPERTY_TIME_END',
+            'PROPERTY_COMPANY',
         ];
 
         $res = \CIBlockElement::GetList('ASC', $arFilter, false, false, $arSelect);
@@ -91,11 +86,153 @@ class Booking {
                 'room' => $item['ROOM'],
                 'date' => $item['DATE'],
                 'time_start' => $item['TIME_START'],
+                'time_end' => $item['TIME_END'],
+                'company_id' => $item['COMPANY'],
+                'company_name' => Company::GetCompanyName($item['COMPANY'])
+            ];
+        }
+
+        return Helper::GetResponseApi(200, ['booking_info' => $arResult]);
+    }
+
+    public static function GetBookingByPeriod($arRequest) {
+        $roomID = $arRequest['room_id'];
+        $date_start = self::formatDate($arRequest['date_start']);
+        $date_end = self::formatDate($arRequest['date_end']);
+
+        $arFilter = Array('IBLOCK_ID'=> \Legacy\Config::Booking,
+            'ACTIVE' => 'Y',
+            'PROPERTY_ROOM' => $roomID,
+            '>=PROPERTY_DATE' => $date_start,
+            '<=PROPERTY_DATE' => $date_end
+        );
+
+        $arSelect = [
+            'ID',
+            'NAME',
+            'PROPERTY_USER',
+            'PROPERTY_ROOM',
+            'PROPERTY_DATE',
+            'PROPERTY_TIME_START',
+            'PROPERTY_TIME_END',
+            'PROPERTY_COMPANY',
+        ];
+
+        $res = \CIBlockElement::GetList('ASC', $arFilter, false, false, $arSelect);
+        $arResult = [];
+
+        while($item = $res->Fetch()){
+            foreach($item as $key => $value){
+                if(strripos($key,'VALUE_ID')){
+                    unset($item[$key]);
+                    continue;
+                }
+                if(strripos($key,'PROPERTY') !== false){
+                    $old_key = $key;
+                    $key = str_replace(['PROPERTY_','_VALUE','~'], '', $key);
+                    $item[$key] = $value;
+                    unset($item[$old_key]);
+                }
+            }
+
+            $arResult[] = [
+                'ID' => $item['ID'],
+                'name' => $item['NAME'],
+                'user' => $item['USER'],
+                'room' => $item['ROOM'],
+                'date' => $item['DATE'],
+                'time_start' => $item['TIME_START'],
+                'time_end' => $item['TIME_END'],
+                'company_id' => $item['COMPANY'],
+                'company_name' => Company::GetCompanyName($item['COMPANY'])
+            ];
+        }
+
+        return Helper::GetResponseApi(200, ['bookings' => $arResult]);
+    }
+
+    public static function GetBookingsByUser() {
+        global $USER;
+
+        $arFilter = Array('IBLOCK_ID'=> \Legacy\Config::Booking,
+            'ACTIVE' => 'Y',
+            'PROPERTY_USER' => $USER->GetID()
+        );
+
+        $arSelect = [
+            'ID',
+            'NAME',
+            'PROPERTY_USER',
+            'PROPERTY_ROOM',
+            'PROPERTY_DATE',
+            'PROPERTY_TIME_START',
+            'PROPERTY_TIME_END'
+        ];
+
+        $res = \CIBlockElement::GetList(Array("ID"=>"DESC"), $arFilter, false, false, $arSelect);
+        $arResult = [];
+
+        while($item = $res->Fetch()){
+            foreach($item as $key => $value){
+                if(strripos($key,'VALUE_ID')){
+                    unset($item[$key]);
+                    continue;
+                }
+                if(strripos($key,'PROPERTY') !== false){
+                    $old_key = $key;
+                    $key = str_replace(['PROPERTY_','_VALUE','~'], '', $key);
+                    $item[$key] = $value;
+                    unset($item[$old_key]);
+                }
+            }
+
+            $arResult[] = [
+                'ID' => $item['ID'],
+                'name' => $item['NAME'],
+                'user' => $item['USER'],
+                'room' => Room::GetRoomInfo($item['ROOM'])['name'].' ('.Room::GetRoomInfo($item['ROOM'])['office'].' каб.)',
+                'date' => $item['DATE'],
+                'time_start' => $item['TIME_START'],
                 'time_end' => $item['TIME_END']
             ];
         }
 
         return Helper::GetResponseApi(200, ['bookings' => $arResult]);
+    }
+
+    public static function GetCompanyBookingsCount($companyID) {
+        $arFilter = Array('IBLOCK_ID'=> \Legacy\Config::Booking,
+            'ACTIVE' => 'Y',
+            'PROPERTY_COMPANY' => $companyID,
+        );
+
+        $arSelect = [
+            'ID'
+        ];
+
+        $res = \CIBlockElement::GetList('ASC', $arFilter, false, false, $arSelect);
+        $arResult = [];
+
+        while($item = $res->Fetch()){
+            foreach($item as $key => $value){
+                if(strripos($key,'VALUE_ID')){
+                    unset($item[$key]);
+                    continue;
+                }
+                if(strripos($key,'PROPERTY') !== false){
+                    $old_key = $key;
+                    $key = str_replace(['PROPERTY_','_VALUE','~'], '', $key);
+                    $item[$key] = $value;
+                    unset($item[$old_key]);
+                }
+            }
+
+            $arResult[] = [
+                'ID' => $item['ID']
+            ];
+        }
+
+        return count($arResult) * 0.5;
     }
 
     static function formatDate($date) {
@@ -105,8 +242,7 @@ class Booking {
     }
 
     public static function AddBooking($arRequest){
-        global $USER;
-
+        $user = User::GetUserInfo($arRequest['user_id']);
         $name = $arRequest['name'];
         $room = $arRequest['room_id'];
         $date = $arRequest['date'];
@@ -118,17 +254,18 @@ class Booking {
             'IBLOCK_ID' => \Legacy\Config::Booking,
             'ACTIVE' =>"Y",
             'PROPERTY_VALUES' => [
-                'USER' => $USER->GetID(),
+                'USER' => $user['id'],
                 'ROOM' => $room,
                 'DATE' => $date,
                 'TIME_START' => $time_start,
                 'TIME_END' => $time_end,
+                'COMPANY' => $user['company_id'],
             ]
         );
 
         $el = new \CIBlockElement;
         if($res = $el->Add($arLoadProperties)){
-            return Helper::GetResponseApi(200, ['booking_id' => $res]);
+            return self::GetBookingInfo($res);
         } else{
             return Helper::GetResponseApi(404, [], 'Ошибка добавления:' . $res->LAST_ERROR);
         }
@@ -143,9 +280,9 @@ class Booking {
 
         $el = new \CIBlockElement;
         if ($res = $el->Update($id, $arFields)) {
-            return Helper::GetResponseApi(200, ['booking_id' => $res]);
+            return Helper::GetResponseApi(200, ['booking_id' => $id]);
         } else {
-            return Helper::GetResponseApi(404, [], 'Ошибка добавления:' . $res->LAST_ERROR);
+            return Helper::GetResponseApi(404, [], 'Ошибка выполнения:' . $res->LAST_ERROR);
         }
     }
 }

@@ -7,13 +7,17 @@ use Bitrix\Main\UserTable;
 
 class CRM {
     public static function GetDealInfo($dealID) {
+        $dealID = 13669;
+
         $res = Helper::CurlCRM("crm.deal.get",
             array(
                 "id" => $dealID
             )
         )["result"];
 
-
+        return Helper::GetResponseApi(200, [
+            'info' => $res
+        ]);
         return $res;
     }
 
@@ -56,7 +60,6 @@ class CRM {
                     "PAY_SYSTEM_ID" => 2,
                     "PERSON_TYPE_ID" => 3,
                     "STATUS_ID" => "N",
-//                    "PRICE" => ,
                     "CURRENCY" => "RUB",
                     "RESPONSIBLE_ID" => 865,
                     "ORDER_TOPIC" => "Сделка #" . $dealID,
@@ -140,5 +143,9 @@ class CRM {
         return Helper::GetResponseApi(200, [
             'actInfo' => $res
         ]);
+    }
+
+    public static function CreateDocuments() {
+        var_dump("работает");
     }
 }

@@ -33,13 +33,15 @@ class User {
                 'LOGIN',
                 'NAME',
                 'LAST_NAME',
-                'EMAIL'
+                'EMAIL',
+                'UF_COMPANY',
+                'UF_HOURS_COUNT'
             ],
-            'filter' => ['ID' => $USER->GetID()]
+            'filter' => ['ID' => $userID]
         ]);
 
         if ($user) {
-            $userGroupID = implode(array_diff($USER->GetUserGroup($USER->GetID()), ["2"]));
+            $userGroupID = implode(array_diff($USER->GetUserGroup($userID), ["2", "1"]));
 
             $userGroup = \CGroup::GetByID($userGroupID)->Fetch();
 
@@ -51,6 +53,8 @@ class User {
                 "email" => $user['EMAIL'],
                 "name" => $user['NAME'],
                 "last_name" => $user['LAST_NAME'],
+                "company_id" => $user['UF_COMPANY'],
+                "hours_count" => $user['UF_HOURS_COUNT'],
                 "group" => $userGroupInfo
             ];
         }

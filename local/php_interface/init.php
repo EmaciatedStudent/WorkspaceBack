@@ -22,6 +22,8 @@ try {
         'Legacy\Api\Booking' => '/local/app/classes/booking/api.php',
         'Legacy\Api\Company' => '/local/app/classes/company/api.php',
         'Legacy\Api\Deal' => '/local/app/classes/deal/api.php',
+        'Legacy\Api\Invoice' => '/local/app/classes/invoice/api.php',
+        'Legacy\Api\Act' => '/local/app/classes/act/api.php',
         'Legacy\Api\CRM' => '/local/app/classes/CRM/api.php',
     ]);
 } catch (LoaderException $e) {

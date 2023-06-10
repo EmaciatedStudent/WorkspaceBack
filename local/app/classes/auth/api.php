@@ -34,9 +34,11 @@ class Auth {
 
         $arDealFields = Array(
             'name' => $dealInfo['TITLE'],
-            'hours_count' => $productsInfo[1]["QUANTITY"],
+            'date_start' => $dealInfo['DATE_START'],
+            'date_end' => $dealInfo['DATE_END'],
             'company' => $company_id,
-            'id_crm' => $deal_id,
+            'hours_count' => $productsInfo[1]["QUANTITY"],
+            'id_crm' => $deal_id
         );
         $deal = Deal::AddDeal($arDealFields);
 
@@ -48,7 +50,8 @@ class Auth {
             "CONFIRM_PASSWORD" => $confirm_password,
             "EMAIL" => $email,
             "GROUP_ID" => $group,
-            "WORK_COMPANY" => $company_id,
+            "UF_COMPANY" => $company_id,
+            "UF_HOURS_COUNT" => $productsInfo[1]["QUANTITY"]
         );
 
         if ($USER->Add($arFields)) {

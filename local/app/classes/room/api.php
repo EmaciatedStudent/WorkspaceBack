@@ -9,14 +9,14 @@ class Room {
     public static function GetRoom($arRequest) {
         $roomID = $arRequest['room_id'];
 
+        $res = self::GetRoomInfo($roomID);
+
         return Helper::GetResponseApi(200, [
-            'room_info' => self::GetRoomInfo($roomID)
+            'room_info' => $res
         ]);
     }
 
     public static function GetRoomInfo($roomID) {
-        global $USER;
-
         $arFilter = Array('IBLOCK_ID'=> \Legacy\Config::Rooms,
             'ACTIVE'=>'Y',
             'ID'=>$roomID,
